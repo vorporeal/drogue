@@ -17,7 +17,7 @@ class Entity {
 
   void draw(CanvasRenderingContext2D ctx) {
     ctx..strokeStyle = strokeStyle
-       ..lineWidth = 3
+       ..lineWidth = 2
        ..fillStyle = fillStyle
        ..strokeRect(rect.left, rect.top, rect.width, rect.height)
        ..fillRect(rect.left, rect.top, rect.width, rect.height);
@@ -33,7 +33,10 @@ class Entity {
 
 
 class Player extends Entity {
-  Player() : super(width: 50.0, height: 50.0);
+  Player() : super(width: 50.0, height: 50.0) {
+    strokeStyle = 'red';
+    fillStyle = 'rgba(255, 0, 0, 0.3)';
+  }
 }
 
 
@@ -45,11 +48,12 @@ class Projectile extends Entity {
   Vector2 _direction;
 
   Projectile(Vector2 position, this._direction) : super(width: 10.0, height: 10.0) {
-    this.fillStyle = '#6495ED';
+    strokeStyle = 'rgb(100, 149, 237)';
+    fillStyle = 'rgba(100, 149, 237, 0.3)';
 
-    this.center = position;
+    center = position;
     // Ensure our direction is a unit vector.
-    this._direction.normalize();
+    _direction.normalize();
   }
 
   void move(double deltaT) {

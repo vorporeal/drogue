@@ -1,5 +1,6 @@
 import 'input.dart';
 import 'entities.dart';
+import 'fps.dart';
 
 import 'package:vector_math/vector_math.dart';
 
@@ -22,21 +23,29 @@ Rectangle screenRect = new Rectangle(0, 0, WIDTH, HEIGHT);
 List<Projectile> projectiles = [];
 
 KeyboardHelper input;
+FPS fps = new FPS();
 
 void movePlayer(double deltaT) {
-  // Move the player, if necessary.
+  // Move the player based on keyboard input.
+  Vector2 playerDir = new Vector2.zero();
   if (input.isPressed(Key.MOVE_LEFT)) {
-    player.rect.left -= deltaT * MOVE_SPEED;
+    playerDir.x -= 1;
   }
   if (input.isPressed(Key.MOVE_RIGHT)) {
-    player.rect.left += deltaT * MOVE_SPEED;
+    playerDir.x += 1;
   }
   if (input.isPressed(Key.MOVE_UP)) {
-    player.rect.top -= deltaT * MOVE_SPEED;
+    playerDir.y -= 1;
   }
   if (input.isPressed(Key.MOVE_DOWN)) {
-    player.rect.top += deltaT * MOVE_SPEED;
+    playerDir.y += 1;
   }
+
+  playerDir.normalize();
+  playerDir *= deltaT * MOVE_SPEED;
+  player.rect..left += playerDir.x
+             ..top  += playerDir.y;
+
 }
 
 void moveProjectiles(double deltaT) {
@@ -48,7 +57,9 @@ void moveProjectiles(double deltaT) {
 
 void render() {
   // Clear the canvas.
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#444';
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // Draw the player.
   player.draw(ctx);
@@ -57,9 +68,14 @@ void render() {
   for (var projectile in projectiles) {
    projectile.draw(ctx);
   }
-  // Update the projectile counter (debugging info).
-  querySelector('#projectile-counter').setInnerHtml(
-     projectiles.length.toString());
+}
+
+void updateStats(double deltaT) {
+  // Update the FPS counter.
+  querySelector('.counter.fps').setInnerHtml(fps.update(deltaT));
+  // Update the projectile counter.
+  querySelector('.counter.projectiles').setInnerHtml(
+    projectiles.length.toString());
 }
 
 void tick(double frameTime) {
@@ -71,6 +87,7 @@ void tick(double frameTime) {
   moveProjectiles(deltaT);
 
   render();
+  updateStats(deltaT);
 
   // Request that we run again next frame.
   window.animationFrame.then(tick);
@@ -105,6 +122,8 @@ void _initializeCanvas() {
         ..style.height = '${canvas.height}px';
   // Insert the canvas element into the DOM.
   querySelector('#container').children.add(canvas);
+  // Focus the canvas element (so keyboard input is captured).
+  canvas.focus();
 
   // Listen for input events on the canvas.
   input = new KeyboardHelper(canvas);
