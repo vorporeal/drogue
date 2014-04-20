@@ -9,14 +9,14 @@ import 'dart:html';
 class Key {
   // Key "enum" constants
   static const
-      MOVE_LEFT = const Key._(65),     // A
-      MOVE_RIGHT = const Key._(68),    // D
-      MOVE_UP = const Key._(87),       // W
-      MOVE_DOWN = const Key._(83),     // S
-      SHOOT_LEFT = const Key._(37),    // Left
-      SHOOT_RIGHT = const Key._(39),   // Right
-      SHOOT_UP = const Key._(38),      // Up
-      SHOOT_DOWN = const Key._(40);    // Down
+      MOVE_LEFT = const Key._(KeyCode.A),
+      MOVE_RIGHT = const Key._(KeyCode.D),
+      MOVE_UP = const Key._(KeyCode.W),
+      MOVE_DOWN = const Key._(KeyCode.S),
+      SHOOT_LEFT = const Key._(KeyCode.LEFT),
+      SHOOT_RIGHT = const Key._(KeyCode.RIGHT),
+      SHOOT_UP = const Key._(KeyCode.UP),
+      SHOOT_DOWN = const Key._(KeyCode.DOWN);
 
   // Variables
 
@@ -33,7 +33,7 @@ class Key {
 
   // Static methods
 
-  static get values => [
+  static List<Key> get values => [
       MOVE_LEFT,
       MOVE_RIGHT,
       MOVE_UP,
@@ -43,6 +43,9 @@ class Key {
       SHOOT_UP,
       SHOOT_DOWN,
   ];
+
+  static List<Key> get shootKeys =>
+      values.where((key) => isShootKey(key)).toList(growable: false);
 
   static Vector2 toDirection(Key key) {
     switch(key) {
@@ -79,18 +82,25 @@ class Key {
 
 
 class KeyboardHelper {
-  final Map<Key, bool> _keyMap = new Map();
+  final Map<int, bool> _keyMap = new Map();
   final Element _eventTarget;
   Stream onKey;
 
   KeyboardHelper(this._eventTarget) {
-    _eventTarget..onKeyDown.listen((e) => _keyMap[e.keyCode] = true)
-                ..onKeyUp.listen((e) => _keyMap[e.keyCode] = false);
+    _eventTarget..onKeyDown.listen((e) => handleKeyboardEvent(e))
+                ..onKeyUp.listen((e) => handleKeyboardEvent(e));
 
     onKey = _eventTarget.onKeyDown
-        .where((e) => Key.isUsedKeyCode(e.keyCode))
-        .map((e) => new Key.fromCode(e.keyCode))
+        .map((KeyboardEvent e) => new KeyEvent.wrap(e))
+        .where((KeyEvent e) => Key.isUsedKeyCode(e.keyCode))
+        .map((KeyEvent e) => new Key.fromCode(e.keyCode))
         .asBroadcastStream();
+  }
+
+  void handleKeyboardEvent(KeyboardEvent e) {
+    bool isDown = e.type == 'keydown';
+    int keyCode = new KeyEvent.wrap(e).keyCode;
+    _keyMap[keyCode]= isDown;
   }
 
   bool isPressed(Key key) {
