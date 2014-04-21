@@ -54,6 +54,10 @@ h1, p {
   bottom: 0;
 }
 
+.sidebar.right {
+  right: 0;
+}
+
 .sidebar .content {
   padding: 0 20px;
   width: 240px;
@@ -72,23 +76,9 @@ h1, p {
   text-align: center;
 }
 
-.toggle:hover {
-  box-shadow: 0px 0px 6px -1px #aaa;
-}
-
-.sidebar > .toggle::before {
-  content: "\27ad";
-}
-
-.sidebar.closed > .toggle {
-  -webkit-transform: rotateY(180deg);
-  transform: rotateY(180deg);
-}
-
-.sidebar.right > .toggle {
+.toggle {
   position: absolute;
-  top: 10px;
-  right: 250px; /* .sidebar{width} + {width} + 10px margin */
+  margin: 10px;
   width: 40px;
   height: 40px;
   border: 1px solid #aaa;
@@ -98,10 +88,23 @@ h1, p {
   line-height: 40px;
 }
 
-.sidebar.right.closed > .toggle {
-  right: 10px;
+.toggle::before {
+  content: "\27ad";
 }
 
-.right {
+.toggle:hover {
+  box-shadow: 0px 0px 6px -1px #aaa;
+}
+
+.sidebar.closed > .toggle {
+  -webkit-transform: rotateY(180deg);
+  transform: rotateY(180deg);
+}
+
+.sidebar.right > .toggle {
+  right: 240px; /* .sidebar{width} + {width} */
+}
+
+.sidebar.right.closed > .toggle {
   right: 0;
 }
