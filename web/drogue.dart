@@ -1,9 +1,11 @@
 import 'input.dart';
 import 'entities.dart';
 import 'fps.dart';
+import 'limiters.dart';
 
 import 'package:vector_math/vector_math.dart';
 
+import 'dart:async';
 import 'dart:html' hide Player;
 import 'dart:math';
 
@@ -14,6 +16,9 @@ final Vector2 CANVAS_SIZE = new Vector2(WIDTH.toDouble(), HEIGHT.toDouble());
 const double MOVE_SPEED = 200 / 1000;
 
 double timeOfLastFrame = 0.0;
+
+StreamController<double> onTickController = new StreamController();
+Stream<double> onTick = onTickController.stream;
 
 Player player;
 CanvasElement canvas;
@@ -47,6 +52,16 @@ void movePlayer(double deltaT) {
              ..top  += playerDir.y;
 
 }
+
+void createProjectiles() {
+  Key.shootKeys.where((key) => input.isPressed(key)).forEach((key) {
+    projectiles.add(new Projectile(player.center, Key.toDirection(key)));
+  });
+}
+
+RateLimiter maybeCreateProjectiles =
+    new RateLimiter.of(createProjectiles)
+        ..frequency = 3.0;
 
 void moveProjectiles(double deltaT) {
   for (var projectile in projectiles) {
@@ -83,7 +98,13 @@ void tick(double frameTime) {
   double deltaT = frameTime - timeOfLastFrame;
   timeOfLastFrame = frameTime;
 
+  onTickController.add(deltaT);
+
   movePlayer(deltaT);
+
+  if (Key.shootKeys.any((key) => input.isPressed(key))) {
+    maybeCreateProjectiles();
+  }
   moveProjectiles(deltaT);
 
   render();
@@ -97,10 +118,8 @@ void main() {
   _initializeCanvas();
   _initializePlayer();
 
-  // If the user presses shoot, create a new projectile.
-  input.onKey.where((Key key) => Key.isShootKey(key)).listen((Key key) {
-    projectiles.add(new Projectile(player.center, Key.toDirection(key)));
-  });
+  // Pass onTick events to the createProjectiles rate limiter.
+  onTick.listen((double deltaT) => maybeCreateProjectiles.update(deltaT));
 
   // Start the game loop.
   window.animationFrame.then((time) => timeOfLastFrame = time).then(tick);
