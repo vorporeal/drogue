@@ -2,6 +2,7 @@ import 'input.dart';
 import 'entities.dart';
 import 'fps.dart';
 import 'limiters.dart';
+import 'sidebar.dart';
 
 import 'package:vector_math/vector_math.dart';
 
@@ -107,6 +108,9 @@ void tick(double frameTime) {
 void main() {
   _initializeCanvas();
   _initializePlayer();
+
+  // Set up event handling for sidebars.
+  querySelectorAll('.sidebar').forEach((el) => Sidebar.decorate(el));
 
   // Configure all per-tick updates.
   onTick

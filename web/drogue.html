@@ -9,15 +9,21 @@
   <body>
     <h1>d rogue</h1>
 
-    <div id="container"></div>
     <div class="sidebar right">
-      <div class="stat">
-        FPS: <span class="counter fps"></span>
-      </div>
-      <div class="stat">
-        Number of projectiles: <span class="counter projectiles"></span>
+      <div class="toggle"></div>
+      <div class="content">
+        <h1>stats</h1>
+        <div class="stat">
+          FPS: <span class="counter fps"></span>
+        </div>
+        <div class="stat">
+          Number of projectiles: <span class="counter projectiles"></span>
+        </div>
+        <div class="group" id="keys"></div>
       </div>
     </div>
+
+    <div id="container"></div>
 
     <script type="application/dart" src="drogue.dart"></script>
     <script src="packages/browser/dart.js"></script>
