@@ -18,7 +18,7 @@ const double MOVE_SPEED = 200 / 1000;
 double timeOfLastFrame = 0.0;
 
 StreamController<double> onTickController = new StreamController();
-Stream<double> onTick = onTickController.stream;
+Stream<double> onTick = onTickController.stream.asBroadcastStream();
 
 Player player;
 CanvasElement canvas;
@@ -98,28 +98,33 @@ void tick(double frameTime) {
   double deltaT = frameTime - timeOfLastFrame;
   timeOfLastFrame = frameTime;
 
+  // Add the elapsed time since last frame to the onTick stream.  This
+  // causes all per-tick updates to occur.
+  // @see main()
   onTickController.add(deltaT);
-
-  movePlayer(deltaT);
-
-  if (Key.shootKeys.any((key) => input.isPressed(key))) {
-    maybeCreateProjectiles();
-  }
-  moveProjectiles(deltaT);
-
-  render();
-  updateStats(deltaT);
-
-  // Request that we run again next frame.
-  window.animationFrame.then(tick);
 }
 
 void main() {
   _initializeCanvas();
   _initializePlayer();
 
-  // Pass onTick events to the createProjectiles rate limiter.
-  onTick.listen((double deltaT) => maybeCreateProjectiles.update(deltaT));
+  // Configure all per-tick updates.
+  onTick
+      // Update rate limiters.
+      ..listen((double deltaT) => maybeCreateProjectiles.update(deltaT))
+      // Move the player.
+      ..listen((double deltaT) => movePlayer(deltaT))
+      // If a shoot key is pressed, create new projectiles.
+      ..where((_) => Key.shootKeys.any((key) => input.isPressed(key)))
+          .listen((_) => maybeCreateProjectiles())
+      // Move all projectiles.
+      ..listen((double deltaT) => moveProjectiles(deltaT))
+      // Render the scene.
+      ..listen((_) => render())
+      // Update stats.
+      ..listen((double deltaT) => updateStats(deltaT))
+      // Request another frame.
+      ..listen((_) => window.animationFrame.then(tick));
 
   // Start the game loop.
   window.animationFrame.then((time) => timeOfLastFrame = time).then(tick);
