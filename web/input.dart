@@ -9,25 +9,26 @@ import 'dart:html';
 class Key {
   // Key "enum" constants
   static const
-      MOVE_LEFT = const Key._(KeyCode.A),
-      MOVE_RIGHT = const Key._(KeyCode.D),
-      MOVE_UP = const Key._(KeyCode.W),
-      MOVE_DOWN = const Key._(KeyCode.S),
-      SHOOT_LEFT = const Key._(KeyCode.LEFT),
-      SHOOT_RIGHT = const Key._(KeyCode.RIGHT),
-      SHOOT_UP = const Key._(KeyCode.UP),
-      SHOOT_DOWN = const Key._(KeyCode.DOWN);
+      MOVE_LEFT =   const Key._(     1, KeyCode.A),
+      MOVE_RIGHT =  const Key._(     2, KeyCode.D),
+      MOVE_UP =     const Key._(     4, KeyCode.W),
+      MOVE_DOWN =   const Key._(     8, KeyCode.S),
+      SHOOT_LEFT =  const Key._(    16, KeyCode.LEFT),
+      SHOOT_RIGHT = const Key._(    32, KeyCode.RIGHT),
+      SHOOT_UP =    const Key._(    64, KeyCode.UP),
+      SHOOT_DOWN =  const Key._(   128, KeyCode.DOWN);
 
   // Variables
 
   static Map<int, Key> _codeToKey = new Map.fromIterable(values,
       key: (Key key) => key.keyCode);
 
+  final int _value;
   final int keyCode;
 
   // Constructors
 
-  const Key._(this.keyCode);
+  const Key._(this._value, this.keyCode);
 
   factory Key.fromCode(int keyCode) => _codeToKey[keyCode];
 
@@ -84,13 +85,15 @@ class Key {
 class KeyboardHelper {
   final Map<int, bool> _keyMap = new Map();
   final Element _eventTarget;
-  Stream onKey;
+  Stream onKeyDown;
+
+  int _keyState = 0;
 
   KeyboardHelper(this._eventTarget) {
     _eventTarget..onKeyDown.listen((e) => handleKeyboardEvent(e))
                 ..onKeyUp.listen((e) => handleKeyboardEvent(e));
 
-    onKey = _eventTarget.onKeyDown
+    onKeyDown = _eventTarget.onKeyDown
         .map((KeyboardEvent e) => new KeyEvent.wrap(e))
         .where((KeyEvent e) => Key.isUsedKeyCode(e.keyCode))
         .map((KeyEvent e) => new Key.fromCode(e.keyCode))
@@ -98,12 +101,19 @@ class KeyboardHelper {
   }
 
   void handleKeyboardEvent(KeyboardEvent e) {
-    bool isDown = e.type == 'keydown';
-    int keyCode = new KeyEvent.wrap(e).keyCode;
-    _keyMap[keyCode]= isDown;
+    var keyCode = new KeyEvent.wrap(e).keyCode;
+    var key = new Key.fromCode(keyCode);
+
+    if (key == null) return;
+
+    if (e.type == 'keydown') {
+      _keyState |= key._value;
+    } else {
+      _keyState &= ~key._value;
+    }
   }
 
   bool isPressed(Key key) {
-    return _keyMap.containsKey(key.keyCode) ? _keyMap[key.keyCode] : false;
+    return (_keyState & key._value) != 0;
   }
 }
