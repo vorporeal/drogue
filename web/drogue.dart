@@ -1,12 +1,11 @@
 import 'input.dart';
 import 'entities.dart';
-import 'fps.dart';
 import 'limiters.dart';
 import 'sidebar.dart';
+import 'gameloop.dart';
 
 import 'package:vector_math/vector_math.dart';
 
-import 'dart:async';
 import 'dart:html' hide Player;
 import 'dart:math';
 
@@ -16,11 +15,7 @@ final Vector2 CANVAS_SIZE = new Vector2(WIDTH.toDouble(), HEIGHT.toDouble());
 
 const double MOVE_SPEED = 200 / 1000;
 
-double timeOfLastFrame = 0.0;
-
-StreamController<double> onTickController = new StreamController();
-Stream<double> onTick = onTickController.stream.asBroadcastStream();
-
+GameLoop gameLoop = new GameLoop();
 Player player;
 CanvasElement canvas;
 CanvasRenderingContext2D ctx;
@@ -29,7 +24,6 @@ Rectangle screenRect = new Rectangle(0, 0, WIDTH, HEIGHT);
 List<Projectile> projectiles = [];
 
 KeyboardHelper input;
-FPS fps = new FPS();
 
 void movePlayer(double deltaT) {
   // Move the player based on keyboard input.
@@ -88,21 +82,10 @@ void render() {
 
 void updateStats(double deltaT) {
   // Update the FPS counter.
-  querySelector('.counter.fps').setInnerHtml(fps.update(deltaT));
+  querySelector('.counter.fps').setInnerHtml(gameLoop.fps.update(deltaT));
   // Update the projectile counter.
   querySelector('.counter.projectiles').setInnerHtml(
     projectiles.length.toString());
-}
-
-void tick(double frameTime) {
-  // Get the delta (in microseconds) between this frame and the last.
-  double deltaT = frameTime - timeOfLastFrame;
-  timeOfLastFrame = frameTime;
-
-  // Add the elapsed time since last frame to the onTick stream.  This
-  // causes all per-tick updates to occur.
-  // @see main()
-  onTickController.add(deltaT);
 }
 
 void main() {
@@ -113,7 +96,7 @@ void main() {
   querySelectorAll('.sidebar').forEach((el) => Sidebar.decorate(el));
 
   // Configure all per-tick updates.
-  onTick
+  gameLoop.onTick
       // Update rate limiters.
       ..listen((double deltaT) => maybeCreateProjectiles.update(deltaT))
       // Move the player.
@@ -126,12 +109,10 @@ void main() {
       // Render the scene.
       ..listen((_) => render())
       // Update stats.
-      ..listen((double deltaT) => updateStats(deltaT))
-      // Request another frame.
-      ..listen((_) => window.animationFrame.then(tick));
+      ..listen((double deltaT) => updateStats(deltaT));
 
   // Start the game loop.
-  window.animationFrame.then((time) => timeOfLastFrame = time).then(tick);
+  gameLoop.start();
 }
 
 
