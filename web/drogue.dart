@@ -56,7 +56,7 @@ RateLimiter maybeCreateProjectiles =
     new RateLimiter.of(createProjectiles)
         ..frequency = 3.0;
 
-void render() {
+void render(double deltaT) {
   // Clear the canvas.
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#444';
@@ -87,18 +87,18 @@ void main() {
   // Configure all per-tick updates.
   gameLoop.onTick
       // Update rate limiters.
-      ..listen((double deltaT) => maybeCreateProjectiles.update(deltaT))
+      ..listen(maybeCreateProjectiles.update)
       // Move the player.
-      ..listen((double deltaT) => movePlayer(deltaT))
+      ..listen(movePlayer)
       // If a shoot key is pressed, create new projectiles.
       ..where((_) => Key.shootKeys.any((key) => input.isPressed(key)))
           .listen((_) => maybeCreateProjectiles())
       // Move all projectiles.
-      ..listen((double deltaT) => Projectiles.updateAll(deltaT))
+      ..listen(Projectiles.updateAll)
       // Render the scene.
-      ..listen((_) => render())
+      ..listen(render)
       // Update stats.
-      ..listen((double deltaT) => updateStats(deltaT));
+      ..listen(updateStats);
 
   // Start the game loop.
   gameLoop.start();
