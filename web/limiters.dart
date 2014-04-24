@@ -41,7 +41,10 @@ class UnLimiter extends Limiter {
   }
 }
 
+typedef bool Precondition();
+
 class RateLimiter extends Limiter {
+  Precondition precondition = () => true;
   double _periodInMillis = double.INFINITY;
   double _millisSinceLastExecute = 0.0;
 
@@ -60,6 +63,7 @@ class RateLimiter extends Limiter {
 
   @override
   bool _canExecute() {
+    if (!precondition()) return false;
     if (_periodInMillis == double.INFINITY) return false;
     if (_periodInMillis == 0.0) return true;
 

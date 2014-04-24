@@ -52,9 +52,13 @@ void createProjectiles() {
   });
 }
 
+// Define a rate-limited version of createProjectiles() which will create a
+// projectile if a shoot key is currently depressed, but not more than once
+// every 3 seconds.
 RateLimiter maybeCreateProjectiles =
     new RateLimiter.of(createProjectiles)
-        ..frequency = 3.0;
+        ..frequency = 3.0
+        ..precondition = () => Key.shootKeys.any((key) => input.isPressed(key));
 
 void render(double deltaT) {
   // Clear the canvas.
@@ -90,9 +94,8 @@ void main() {
       ..listen(maybeCreateProjectiles.update)
       // Move the player.
       ..listen(movePlayer)
-      // If a shoot key is pressed, create new projectiles.
-      ..where((_) => Key.shootKeys.any((key) => input.isPressed(key)))
-          .listen((_) => maybeCreateProjectiles())
+      // If necessary, create new projectiles.
+      ..listen((_) => maybeCreateProjectiles())
       // Move all projectiles.
       ..listen(Projectiles.updateAll)
       // Render the scene.
