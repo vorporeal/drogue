@@ -21,8 +21,6 @@ CanvasElement canvas;
 CanvasRenderingContext2D ctx;
 Rectangle screenRect = new Rectangle(0, 0, WIDTH, HEIGHT);
 
-List<Projectile> projectiles = [];
-
 KeyboardHelper input;
 
 void movePlayer(double deltaT) {
@@ -50,20 +48,13 @@ void movePlayer(double deltaT) {
 
 void createProjectiles() {
   Key.shootKeys.where((key) => input.isPressed(key)).forEach((key) {
-    projectiles.add(new Projectile(player.center, Key.toDirection(key)));
+    new Projectile(player.center, Key.toDirection(key));
   });
 }
 
 RateLimiter maybeCreateProjectiles =
     new RateLimiter.of(createProjectiles)
         ..frequency = 3.0;
-
-void moveProjectiles(double deltaT) {
-  for (var projectile in projectiles) {
-    projectile.move(deltaT);
-  }
-  projectiles.removeWhere((Projectile p) => !p.isAlive());
-}
 
 void render() {
   // Clear the canvas.
@@ -75,9 +66,7 @@ void render() {
   player.draw(ctx);
 
   // Draw the projectiles.
-  for (var projectile in projectiles) {
-   projectile.draw(ctx);
-  }
+  Projectiles.renderAll(ctx);
 }
 
 void updateStats(double deltaT) {
@@ -85,7 +74,7 @@ void updateStats(double deltaT) {
   querySelector('.counter.fps').setInnerHtml(gameLoop.fps.update(deltaT));
   // Update the projectile counter.
   querySelector('.counter.projectiles').setInnerHtml(
-    projectiles.length.toString());
+    Projectiles.count.toString());
 }
 
 void main() {
@@ -105,7 +94,7 @@ void main() {
       ..where((_) => Key.shootKeys.any((key) => input.isPressed(key)))
           .listen((_) => maybeCreateProjectiles())
       // Move all projectiles.
-      ..listen((double deltaT) => moveProjectiles(deltaT))
+      ..listen((double deltaT) => Projectiles.updateAll(deltaT))
       // Render the scene.
       ..listen((_) => render())
       // Update stats.

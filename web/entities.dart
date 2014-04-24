@@ -48,10 +48,14 @@ class Projectile extends Entity {
   Vector2 _direction;
 
   Projectile(Vector2 position, this._direction) : super(width: 10.0, height: 10.0) {
+    // Store the projectile in the global list.
+    Projectiles._list.add(this);
+
+    // Set some stuff.
+    center = position;
     strokeStyle = 'rgb(100, 149, 237)';
     fillStyle = 'rgba(100, 149, 237, 0.3)';
 
-    center = position;
     // Ensure our direction is a unit vector.
     _direction.normalize();
   }
@@ -65,5 +69,21 @@ class Projectile extends Entity {
 
   bool isAlive() {
     return _distanceTravelled <= _maxDistance;
+  }
+}
+
+class Projectiles {
+  static final List<Projectile> _list = [];
+
+  static List<Projectile> get all => _list;
+  static int get count => _list.length;
+
+  static updateAll(double deltaT) {
+    _list.forEach((p) => p.move(deltaT));
+    _list.removeWhere((p) => !p.isAlive());
+  }
+
+  static renderAll(CanvasRenderingContext2D ctx) {
+    _list.forEach((p) => p.draw(ctx));
   }
 }
