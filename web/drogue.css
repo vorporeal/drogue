@@ -1,14 +1,24 @@
 
 *, *::before, *::after {
   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
- }
+}
+
+html {
+  overflow: hidden;
+}
+
 body {
   background-color: #F8F8F8;
   font-family: 'Open Sans', sans-serif;
   font-size: 14px;
   font-weight: normal;
-  line-height: 1.2em;
-  margin: 15px;
+  line-height: 1;
+}
+
+h1 {
+  margin: 14px 0;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 h1, p {
@@ -33,29 +43,35 @@ h1, p {
 }
 
 .stat {
-  line-height: 1.5em;
+  line-height: 1.5;
 }
 
 .counter {
   font-weight: bold;
 }
 
-.sidebar + #container {
+.main {
+  margin: 15px;
+}
+
+.sidebar.right + .container {
   margin-right: 240px;
 }
 
-.sidebar.closed + #container {
-  margin-right: 0;
+.sidebar.right.closed + .main {
+  margin-right: 60px;
 }
 
 .sidebar {
   position: absolute;
   top: 0;
   bottom: 0;
+  z-index: 1;
 }
 
 .sidebar.right {
   right: 0;
+  margin-left: 60px;
 }
 
 .sidebar .content {
@@ -90,6 +106,8 @@ h1, p {
 
 .toggle::before {
   content: "\27ad";
+  position: relative;
+  top: -1px;
 }
 
 .toggle:hover {

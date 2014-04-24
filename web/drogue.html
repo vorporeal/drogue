@@ -4,11 +4,10 @@
   <head>
     <meta charset="utf-8">
     <title>d rogue</title>
+    <link rel="stylesheet" href="reset.css">
     <link rel="stylesheet" href="drogue.css">
   </head>
   <body>
-    <h1>d rogue</h1>
-
     <div class="sidebar right">
       <div class="toggle"></div>
       <div class="content">
@@ -23,7 +22,10 @@
       </div>
     </div>
 
-    <div id="container"></div>
+    <div class="main">
+      <h1>d rogue</h1>
+      <div id="container"></div>
+    </div>
 
     <script type="application/dart" src="drogue.dart"></script>
     <script src="packages/browser/dart.js"></script>
