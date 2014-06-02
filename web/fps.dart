@@ -1,6 +1,4 @@
-library fps;
-
-import "dart:collection";
+part of core;
 
 class FPS {
   int _windowSize;
@@ -32,6 +30,6 @@ class FPS {
       return "??";
     }
 
-    return (1000 / _averageFrameTime).round().toString();
+    return (1 / _averageFrameTime).round().toString();
   }
 }

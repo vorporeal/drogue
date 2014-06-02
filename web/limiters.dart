@@ -45,36 +45,36 @@ typedef bool Precondition();
 
 class RateLimiter extends Limiter {
   Precondition precondition = () => true;
-  double _periodInMillis = double.INFINITY;
-  double _millisSinceLastExecute = 0.0;
+  double _periodSecs = double.INFINITY;
+  double _secsSinceLastExecute = 0.0;
 
   RateLimiter.of(Function f) : super.of(f);
 
   set frequency(double freq) {
     if (freq == 0.0) {
-      _periodInMillis = double.INFINITY;
+      _periodSecs = double.INFINITY;
     } else if (freq == double.INFINITY) {
-      _periodInMillis = 0.0;
+      _periodSecs = 0.0;
     } else {
-      _periodInMillis = 1000.0 / freq;
+      _periodSecs = 1 / freq;
     }
   }
-  get frequency => _periodInMillis / 1000.0;
+  get frequency => 1 / _periodSecs;
 
   @override
   bool _canExecute() {
     if (!precondition()) return false;
-    if (_periodInMillis == double.INFINITY) return false;
-    if (_periodInMillis == 0.0) return true;
+    if (_periodSecs == double.INFINITY) return false;
+    if (_periodSecs == 0.0) return true;
 
-    bool canExecute = _millisSinceLastExecute > _periodInMillis;
+    bool canExecute = _secsSinceLastExecute > _periodSecs;
     if (canExecute) {
-      _millisSinceLastExecute = 0.0;
+      _secsSinceLastExecute = 0.0;
     }
     return canExecute;
   }
 
   void update(double deltaT) {
-    _millisSinceLastExecute += deltaT;
+    _secsSinceLastExecute += deltaT;
   }
 }

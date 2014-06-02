@@ -58,10 +58,10 @@ class Key {
         return new Vector2(1.0, 0.0);
       case MOVE_UP:
       case SHOOT_UP:
-        return new Vector2(0.0, -1.0);
+        return new Vector2(0.0, 1.0);
       case MOVE_DOWN:
       case SHOOT_DOWN:
-        return new Vector2(0.0, 1.0);
+        return new Vector2(0.0, -1.0);
       default:
         return null;
     }
